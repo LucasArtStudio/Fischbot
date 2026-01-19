@@ -13,6 +13,13 @@ import re
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 #pytesseract.pytesseract.tesseract_cmd = r'D:\Programme\Python Umgebung\Tesseract\tesseract.exe'
 pause_threads = threading.Event()
+pause_threads2 = threading.Event()
+
+def Leveln(x1, y1):
+    if (pyautogui.pixelMatchesColor(x1 + 67, y1 + 111, (199, 199, 199))):
+        pydirectinput.click((x1 + 67, y1 + 111))
+
+
 
 def DropItems(item, x1, y1, x2, y2):
     invSeite1 = 'InvSeite1.png'
@@ -81,13 +88,21 @@ def FischanHaken(x1, y1):
 
     if pyautogui.pixelMatchesColor(x1 + 263, y1 + 185, (175, 115, 98), tolerance=13) or pyautogui.pixelMatchesColor(x1 + 263, y1 + 185, (206, 138, 107), tolerance=13): #Puppe Tag
         wurmx, wurmy = find_color_in_inv(x1 + 627, y1 + 238, (245, 192, 173))
+        while pause_threads2.is_set():
+            time.sleep(0.01)
         pydirectinput.click(x1 + 650, y1 + 180)
+        while pause_threads2.is_set():
+            time.sleep(0.01)
         pydirectinput.rightClick(wurmx, wurmy)
         pydirectinput.press('space')
 
     if pyautogui.pixelMatchesColor(x1 + 263, y1 + 185, (85, 59, 57), tolerance=6): #Puppe Nacht
         wurmx, wurmy = find_color_in_inv(x1 + 627, y1 + 238, (245, 192, 173))
+        while pause_threads2.is_set():
+            time.sleep(0.01)
         pydirectinput.click(x1 + 650, y1 + 180)
+        while pause_threads2.is_set():
+            time.sleep(0.01)
         pydirectinput.rightClick(wurmx, wurmy)
         pydirectinput.press('space')
 
@@ -116,7 +131,7 @@ def Auswurf():
         Login(x1, y1)
         Aufstehen(x1, y1)
 
-        time.sleep(1)
+        time.sleep(0.5) #Zeit wie schnell nach gewurmt wird
 
 def Login(x1, y1):
     global pause_threads
@@ -133,8 +148,6 @@ def Login(x1, y1):
         time.sleep(0.01)
     if (not pyautogui.pixelMatchesColor(x1 + 760, y1 + 100, (8, 4, 8))
             and pyautogui.pixelMatchesColor(x1 + 785, y1 + 140, (99, 48, 0))):
-        pause_threads.set()
-        print("Kritischer Bereich")
         pydirectinput.click(x1 + 785, y1 + 140)
         pydirectinput.press('i')
         print("Inv nicht geöffnet")
@@ -143,15 +156,18 @@ def Login(x1, y1):
         time.sleep(2)
         pydirectinput.keyUp('r')
         pydirectinput.keyUp('g')
-
+        pause_threads.set()
+        print("Kritischer Bereich")
+        pydirectinput.click(x1 + 785, y1 + 140)
         pydirectinput.press('w')
         pydirectinput.press('w')
+        sleep(0.05)
         print("Kritischer Bereich Ende")
-        time.sleep(0.1)
         pause_threads.clear()
 
+
 def Aufstehen(x1,y1):
-    if pyautogui.pixelMatchesColor(x1 + 560, y1 + 450, (104, 135, 168), tolerance=10):
+    if pyautogui.pixelMatchesColor(x1 + 560, y1 + 450, (82, 107, 140), tolerance=8) or pyautogui.pixelMatchesColor(x1 + 560, y1 + 450, (104, 135, 168), tolerance=8) or pyautogui.pixelMatchesColor(x1 + 560, y1 + 450, (135, 174, 200), tolerance=8):
         print('Aufstehen')
         pydirectinput.rightClick(x1 + 620, y1 + 80)
         time.sleep(1)
@@ -163,7 +179,6 @@ def Aufstehen(x1,y1):
         print(x, y)
         pydirectinput.rightClick(x, y)
         pause_threads.clear()
-
 
 def OpenInv(x1,y1):
     if (pyautogui.pixelMatchesColor(x1 + 760, y1 + 100, (8, 4, 8))):
@@ -229,10 +244,6 @@ def Reichsiegel(x1, y1):
     if (pyautogui.pixelMatchesColor(x1 + 402, y1 + 386, (255, 255, 255))):
         pydirectinput.leftClick(x1 + 402, y1 + 386)
 
-    pydirectinput.keyDown('w')
-    time.sleep(0.5)
-    pydirectinput.keyUp('w')
-
 def AutoFisching():
     pydirectinput.click(1000,0)
     while True:
@@ -265,28 +276,31 @@ def AutoFisching():
         t3.join()
         print(datetime.datetime.now())
         t4.join()
-        sleep(2)
+        #sleep(2)
         x1 = 7
         y1 = 0
         pydirectinput.click(x1 + 760, y1 + 100)
-        Drop(x1,y1, 800, 600)
+        Drop(x1, y1, 800, 600)
         Aufstehen(x1, y1)
-        #laufen()
 
         x1 = 1757
         y1 = 0
         pydirectinput.click(x1 + 760, y1 + 100)
-        Drop(x1,y1, 800, 600)
+        Drop(x1, y1, 800, 600)
         Aufstehen(x1, y1)
-        #laufen()
 
         x1 = 7
         y1 = 770
         pydirectinput.click(x1 + 760, y1 + 100)
-        Drop(x1,y1, 800, 600)
+        Drop(x1, y1, 800, 600)
         Aufstehen(x1, y1)
-        #laufen()
 
+def find_color_in_inv(x1, y1, target_color, tolerance = 1):
+    for y in range(y1, y1 + 32*8 + 1, 32):
+        for x in range(x1, x1 + 32*4 + 1, 32):
+            if pyautogui.pixelMatchesColor(x, y, target_color, tolerance=tolerance):
+                return x , y
+    return 0, 0
 
 def Bot(x1, y1):
     while True:
@@ -296,17 +310,16 @@ def Bot(x1, y1):
         pixelMatchesColor = pyautogui.pixelMatchesColor(x1 + 390, y1 + 170, (255, 255, 255), tolerance=10) #Einhol Symbole erkennen
         if(pixelMatchesColor):
             time.sleep(2.7)
+            while pause_threads.is_set():
+                time.sleep(0.01)
+            global pause_threads2
+            pause_threads2.set()
             pydirectinput.click(x1 + 785, y1 + 140)
             pydirectinput.press('space')
+            pause_threads2.clear()
             print('Ziehe Fisch raus.')
-            time.sleep(3)
 
-def find_color_in_inv(x1, y1, target_color, tolerance = 1):
-    for y in range(y1, y1 + 32*8 + 1, 32):
-        for x in range(x1, x1 + 32*4 + 1, 32):
-            if pyautogui.pixelMatchesColor(x, y, target_color, tolerance=tolerance):
-                return x , y
-    return 0, 0
+            time.sleep(10)
 
 def move_clients():
     pyautogui.mouseDown(50, 15, button='left')
@@ -316,19 +329,24 @@ def move_clients():
     sleep(0.7)
     pyautogui.mouseUp(50, 785, button='left')
 
+def move_clientsLeveln():
+    pyautogui.mouseDown(50, 15, button='left')
+    sleep(0.7)
+    pyautogui.mouseUp(900, 15, button='left')
 
 #move_clients()
+#move_clientsLeveln()
 AutoFisching()
 
-
-x1=7
+x1=1757
 y1=0
-x, y = find_color_in_inv(x1 + 618, y1 + 230, (38, 26, 20), 8)
-print(x, y)
-color = pyautogui.screenshot().getpixel((x1 + 618, y1 + 230))
+#x, y = find_color_in_inv(x1 + 560, y1 + 450, (38, 26, 20), 8)
+#print(x, y)
+color = pyautogui.screenshot().getpixel((x1 + 560, y1 + 450))
 print(color)
-pydirectinput.moveTo(x1 + 618, y1 + 230)
-sleep(10.7)
+pydirectinput.moveTo(x1 + 66, y1 + 111)
+
+
 werte = []  # Array für alle RGB-Werte
 n = 200
 
@@ -357,12 +375,5 @@ b_avg = sum(b_values) / len(b_values)
 print("R Mittelwert:", r_avg)
 print("G Mittelwert:", g_avg)
 print("B Mittelwert:", b_avg)
-#print(find_color_in_inv(1757, 0 ,(245, 192, 173)))
-
-#OpenInv(7, 0)
-#AutoFisching()
-#pydirectinput.click(760 + 7,100)
-color = pyautogui.screenshot().getpixel((x1 + 407, y1 + 393))
-print(color)
 
 
