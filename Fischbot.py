@@ -30,71 +30,36 @@ def Leveln(x1, y1):
 
 
 
-def DropItems(item, x1, y1):
-    try:
-        # Alle Vorkommen des Bildes im Bereich finden
-        matches = list(pyautogui.locateAllOnScreen(
-            item,
-            grayscale=True,
-            confidence=0.95,  # etwas lockerer, damit kleine Unterschiede keine Probleme machen
-            region=(x1 + 600, y1 + 200, 180, 350)  # x, y, width, height
-        ))
+def DropItems(target_color, x1, y1):
+    for y in range(y1 + 235, y1 + 235 + 32*8 + 1, 32):
+        for x in range(x1 + 625, x1 + 625 + 32*4 + 1, 32):
+            if pyautogui.pixelMatchesColor(x, y, target_color):
+                pydirectinput.click(x, y)  # Bild anklicken
+                # Drop POS
+                pydirectinput.click(x1 + 370, y1 + 350)
 
-        if not matches:
-            return
-
-        for box in matches:
-            x, y = pyautogui.center(box)
-            pydirectinput.click(x, y)  # Bild anklicken
-            time.sleep(0.05)
-
-            # Drop POS
-            pydirectinput.click(x1 + 400, y1 + 350)
-            time.sleep(0.05)
-
-            # Bestätigen
-            pydirectinput.click(x1 + 370, y1 + 350)
-
-    except Exception as e:
-        pass
+                # Bestätigen
+                pydirectinput.click(x1 + 370, y1 + 350)
 
 def Drop(x1, y1):
-    KleinerFisch = 'KleinerFisch.png'
-    KleinerZander = 'KleinerZander.png'
-    Graskarpfen = 'Graskarpfen.png'
-    Kaiser = 'Kaiser.png'
-    Kaiser2 = 'Kaiser2.png'
-    Karpfen = 'Karpfen.png'
-    Lachs = 'Lachs.png'
-    Mandarinfisch = 'Mandarinfisch.png'
-    Regenbogenforelle = 'Regenbogenforelle.png'
-    Ring = 'Ring.png'
-    Tenchi = 'Tenchi.png'
-    Umhang = 'Umhang.png'
-    Zander = 'Zander.png'
-    Bachforelle = 'Bachforelle.png'
-    Rotfeder = 'Rotfeder.png'
-    Aal = 'Aal.png'
-    Barsch = 'Barsch.png'
-    Lotusfisch = 'Lotusfisch.png'
-    DropItems(Barsch, x1, y1)
-    DropItems(Aal, x1, y1)
-    DropItems(Rotfeder, x1, y1)
-    DropItems(KleinerFisch, x1, y1)
-    DropItems(Bachforelle, x1, y1)
-    DropItems(KleinerZander, x1, y1)
-    DropItems(Graskarpfen, x1, y1)
-    DropItems(Kaiser, x1, y1)
-    DropItems(Kaiser2, x1, y1)
-    DropItems(Karpfen, x1, y1)
-    DropItems(Lachs, x1, y1)
-    DropItems(Mandarinfisch, x1, y1)
-    DropItems(Regenbogenforelle, x1, y1)
-    DropItems(Ring, x1, y1)
-    DropItems(Tenchi, x1, y1)
-    DropItems(Umhang, x1, y1)
-    DropItems(Lotusfisch, x1, y1)
-    DropItems(Zander, x1, y1)
+    DropItems((57, 61, 62), x1, y1)#Barsch
+    DropItems((91, 65, 45), x1, y1 + 3)#Aal
+    DropItems((241, 216, 180), x1, y1)#Rotfeder
+    DropItems((102, 82, 82), x1, y1)#KleinerFisch
+    DropItems((133, 133, 122), x1, y1)#Bachforelle
+    #DropItems(KleinerZander, x1, y1)#KleinerZander
+    DropItems((122, 110, 73), x1, y1)#Graskarpfen
+    DropItems((38, 31, 8), x1, y1)#Symbole d. weisen Kaisers
+    DropItems((172, 169, 98), x1, y1)#Handschuhe d. weisen Kaiser2
+    DropItems((208, 179, 179), x1, y1)#Karpfen
+    DropItems((72, 82, 29), x1, y1)#Lachs
+    DropItems((183, 163, 133), x1, y1)#Mandarinfisch
+    DropItems((230, 229, 201), x1, y1) #Regenbogenforelle
+    DropItems((53, 71, 28), x1, y1) #Lucys Ring
+    DropItems((205, 207, 98), x1, y1) #Tenchi
+    DropItems((87, 87, 81), x1, y1) #Umhang
+    DropItems((255, 255, 255), x1, y1) #Lotusfisch
+    DropItems((175, 169, 116), x1, y1) #Zander
 
 def FischanHaken(x1, y1):
     if (not pyautogui.pixelMatchesColor(x1 + 760, y1 + 100, (8, 4, 8))
@@ -198,10 +163,13 @@ def Aufstehen(x1,y1):
         pydirectinput.click(x1 + 785, y1 + 140)
         pydirectinput.press('space')
         time.sleep(3)
-    x, y = find_color_in_inv(x1 + 618, y1 + 230, (38, 26, 20), 8)
-    if not (x==0 and y==0):
+    result = find_color_in_inv(x1 + 618, y1 + 230, (38, 26, 20), 8)
+    if result is not None:
+        x, y = result
+
         while pause_threads2.is_set():
             time.sleep(0.01)
+
         pydirectinput.rightClick(x, y)
 
 
@@ -339,12 +307,11 @@ def AutoFisching():
         Drop(x1, y1)
         Aufstehen(x1, y1)
 
-def find_color_in_inv(x1, y1, target_color, tolerance = 1):
+def find_color_in_inv(x1, y1, target_color, tolerance = 0):
     for y in range(y1, y1 + 32*8 + 1, 32):
         for x in range(x1, x1 + 32*4 + 1, 32):
             if pyautogui.pixelMatchesColor(x, y, target_color, tolerance=tolerance):
                 return x , y
-    return 0, 0
 
 def Bot(x1, y1, wait_time):
     while True:
@@ -378,7 +345,7 @@ def move_clientsLeveln():
     sleep(0.7)
     pyautogui.mouseUp(900, 15, button='left')
 
-#move_clients()
+move_clients()
 #move_clientsLeveln()
 AutoFisching()
 
